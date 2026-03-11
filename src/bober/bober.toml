@@ -1,0 +1,37 @@
+[aliases]
+leader = "composer-1.5"
+senior = "composer-1.5"
+junior = "composer-1"
+
+
+[actions]
+
+[actions.doit]
+prompt = "read the file <<path>> and do it"
+
+[actions.pick]
+loop = 10
+prompt = """
+1. read the project file at <<path>>
+2. pick the next task and either execute it or split it into smaller tasks
+3. if the task is trivial or requires a lot of input in LLM context, then delegate it to junior model
+   - create a new, self-contained task description at <<path>>.{{step_short_slug}}.junior.md
+   - run './bober0.py doit <<path>>.{{step_short_slug}}.junior.md --model junior'
+4. update the project file
+5. When everything is done put BREAK-THE-LOOP keyword in your output
+"""
+stopwords = ["BREAK-THE-LOOP"]
+
+[actions.plan]
+prompt = """
+1. read the file <<path>> YOU MUST NOT EDIT IT
+2. plan the execution steps
+3. create a self contained task description at <<outpath>>
+   - it will be "executed" by the agent
+   - it will be modified by the agent
+   - it will be used for tracking execution progress
+   - the agent MUST NOT edit the original file at <<path>> 
+4. output logs will be stored at <<logpath>> as JSONL
+   - you can read them BUT NOT EDIT THEM
+   - use jq for filtering
+"""
