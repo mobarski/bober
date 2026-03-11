@@ -6,7 +6,7 @@ OUTPUT: README.md
 
 # Bober
 
-Ciasna pętla agentyczna / harness w stylu Ralpha i trochę Autoresearch.
+Lekka pętla agentyczna / harness w stylu Ralpha i trochę Autoresearch.
 Po co: wykonywalna specyfikacja / program w markdown.
 
 Niecałe 200 linii kodu = łatwe zrozumienie i audyt.
@@ -18,6 +18,7 @@ Dodane kilka kluczowych (moim zdaniem) mechanizmów:
 - proste wywołanie bo konfiguracja w pliku
 - odrobina obserwowalności poprzez JSONL
 - podobieństwo do unixowych procesów: stdin, stdout, stderr + skutki uboczne
+- łatwa produkcja wielu wariantów z jednego wejścia
 
 Ograniczenia:
 - na razie może używać tylko "Cursor CLI" jako agenta (bo prostsza implementacja)
@@ -28,8 +29,8 @@ Ograniczenia:
 `bober plan inbox/task1.md`
 `bober loop inbox/task1.md 20`
 
-`bober plan inbox/task1.md --version mk2`
-`bober loop inbox/task1.md 20 --version mk2`
+`bober plan inbox/task1.md --variant mk2`
+`bober loop inbox/task1.md 20 --variant mk2`
 
 # Skąd nazwa
 
@@ -44,6 +45,6 @@ Ograniczenia:
 - [x] uv tool install
 - [x] init
 - [x] --variant
-- [ ] help
+- [x] help
 - [ ] ochrona plików
 - [ ] --config vs --configdir vs --cfgdir vs ~/.bober.toml
