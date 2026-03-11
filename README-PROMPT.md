@@ -6,7 +6,7 @@ OUTPUT: README.md
 
 # Bober
 
-Lekka pętla agentyczna / harness w stylu snarktank/ralph i trochę karpathy/autoresearch.
+Lekka pętla agentyczna / harness w stylu [ralph](https://github.com/snarktank/ralph) i trochę [autoresearch](https://github.com/karpathy/autoresearch).
 Po co: wykonywalna specyfikacja / program w markdown.
 
 Niecałe 200 linii kodu = łatwe zrozumienie i audyt.
@@ -38,8 +38,8 @@ Ograniczenia:
 
 # Skąd nazwa
 
-- memiczne polskie zwierze
-- budowniczy
+- znane memiczne polskie zwierze (nie linkuj to niczego XD)
+- bobry budują rzeczy... i tylko czasem powoduje to podtopienia lub suszę ;)
 
 # Instalacja
 

@@ -1,10 +1,24 @@
 # Bober
 
-Lightweight agentic loop in under 200 lines of Python.
+Lightweight agentic loop / harness. Under 200 lines of Python — easy to read, audit, and extend.
 
-Write a program as a markdown file → Bober runs an AI agent on it in a loop.
+Inspired by [ralph](https://github.com/snarktank/ralph) and [autoresearch](https://github.com/karpathy/autoresearch).
 
-Inspired by [snarktank/ralph](https://github.com/snarktank/ralph) and [karpathy/autoresearch](https://github.com/lemonodor/autoresearch).
+**Core idea:** write an executable specification in Markdown, let an agent run it in a loop.
+
+## Features
+
+- **Model aliases** — map `leader` / `senior` / `junior` to concrete models, pick the right size for the job
+- **Loop stopwords** — agent can break the loop by emitting a keyword (e.g. `BREAK-THE-LOOP`)
+- **Hard iteration limit** — always bounded, no runaway loops
+- **Config-driven** — prompts and settings live in a TOML file, CLI stays minimal
+- **JSONL logs** — every iteration logged for observability and post-mortem
+- **Unix process analogy:**
+  - stdin → `path` (your Markdown program)
+  - stdout → `outpath` (execution output, also Markdown)
+  - stderr → `logpath` (JSONL agent logs)
+  - side effects → file changes on disk
+- **Variants** — produce multiple outputs from a single input
 
 ## Install
 
@@ -14,64 +28,46 @@ uv tool install git+https://github.com/mobarski/bober
 
 ## Quick start
 
+Plan the execution, then run it:
+
 ```bash
-bober plan inbox/task1.md           # create execution plan → task1.md.out.md
-bober pick inbox/task1.md 20        # run loop, max 20 iterations
-
-bober plan inbox/task1.md --variant mk2   # named variant → task1.md.mk2.md
-bober pick inbox/task1.md 20 --variant mk2
+bober plan inbox/task1.md
+bober loop inbox/task1.md 20
 ```
 
-Example task file (`inbox/task1.md`):
+With a named variant:
 
-```markdown
-# Task
-- create empty file "hello.py"
-- write hello world program in this file
-- execute it with uv
-- log output to "output.txt"
+```bash
+bober plan inbox/task1.md --variant mk2
+bober loop inbox/task1.md 20 --variant mk2
 ```
 
-## How it works
+## Usage
 
 ```
-task.md ──→ bober plan ──→ task.md.out.md (execution plan)
-              ↓
-            bober pick ──→ agent loop (read → work → update)
-              ↓
-            stops when:
-              • stopword in output (e.g. BREAK-THE-LOOP)
-              • non-zero exit code
-              • iteration limit reached
+bober <action> <path> [loop] [options]
+
+Actions:
+    help      show help
+    init      create a new config file at <path>
+    plan      plan execution for the program at <path>
+    pick      pick the next task from the program at <path>
+
+Options:
+    --model <model>       model name or alias
+    --mode <mode>         agent mode
+    --variant <variant>   output variant name
 ```
-
-Each iteration: the agent reads the task, does work, updates progress in the output file.
-
-## Unix-like I/O
-
-| Concept | Bober equivalent |
-|---|---|
-| stdin | task file (your markdown program) |
-| stdout | `.out.md` (execution output) |
-| stderr | `.log.jsonl` (structured logs) |
-| side effects | files created/modified by the agent |
-
-## Key features
-
-- **Model aliases** — map `leader` / `senior` / `junior` to concrete models in config
-- **Stopwords** — break the loop on keyword match (per action)
-- **Hard iteration limit** — positional arg, always enforced
-- **JSONL logs** — timestamp, duration, exit code, stdout/stderr per iteration
-- **Variants** — multiple outputs from one input (`--variant mk2`)
-- **~200 LOC** — easy to read, audit, fork
 
 ## Configuration
 
-Default config ships with the package. To customize:
+Default config is bundled (`bober.toml`). Create your own with:
 
 ```bash
 bober init my-config.toml
 ```
+
+Example config:
 
 ```toml
 [aliases]
@@ -92,17 +88,17 @@ prompt = """
 1. read the project file at <<path>>
 2. pick the next task and execute it or split it
 3. update the project file
-4. When done put BREAK-THE-LOOP in your output
+4. When everything is done put BREAK-THE-LOOP keyword in your output
 """
 ```
 
-Placeholders: `<<path>>`, `<<outpath>>`, `<<logpath>>`, `<<variant>>` — replaced at runtime.
+Placeholders in prompts: `<<path>>`, `<<outpath>>`, `<<logpath>>`, `<<variant>>`.
 
 ## Limitations
 
-- Only **Cursor CLI** (`agent`) as backend for now
-- No parallel agent execution (keeps sync simple)
+- Agent backend: Cursor CLI only (for now)
+- No parallel agent execution (keeps synchronization simple)
 
 ## Why "Bober"
 
-[Bober kurwa](https://knowyourmeme.com/memes/bober-kurwa) — a meme-famous Polish beaver. Beavers build things.
+Beavers build things... and only sometimes cause floods.
