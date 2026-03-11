@@ -1,6 +1,8 @@
 [project]
 name = "bober"
 version = "0.1.0"
+description = "Lightweight agentic loop / harness"
+authors = [{name = "Maciej Obarski"}]
 requires-python = ">=3.13"
 dependencies = []
 
