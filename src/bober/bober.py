@@ -20,7 +20,7 @@ state.config = {}
 
 ### API SURFACE ###############################################################################
 
-def do_loop(action: str, path: str, /, loop=1, mode=None, model=None, stopwords=None):
+def do_loop(action: str, path: str, /, loop=1, mode=None, model=None, stopwords=None, variant=None):
     assert loop > 0, 'loop must be positive'
     outpath = _get_default_outpath(action, path)
     logpath = _get_default_logpath(action, path)
@@ -28,7 +28,7 @@ def do_loop(action: str, path: str, /, loop=1, mode=None, model=None, stopwords=
     model = model or _get_model(action)
     model = _resolve_model(model)
     for i in range(1,loop+1):
-        result = _do_task(action, path, outpath=outpath, logpath=logpath, mode=mode, model=model)
+        result = _do_task(action, path, outpath=outpath, logpath=logpath, mode=mode, model=model, variant=variant)
         result['iteration'] = i
         result['max_iterations'] = loop
         if logpath:
@@ -60,14 +60,14 @@ def load_config(path=None):
 def init_config(path):
     if os.path.exists(path):
         raise ValueError(f'Config file {path} already exists')
-    default_config = "TODO" # TODO: read from package assets
+    default_config = open(CONFIG_PATH, 'r').read()
     with open(path, 'w') as f:
         f.write(default_config)
 
 
 ### INTERNALS #################################################################################
 
-def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, model=None):
+def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, model=None, variant=None):
     t0 = time()
     if not os.path.exists(path):
         returncode = 129 # ENOENT: No such file or directory
@@ -78,6 +78,7 @@ def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, mo
         prompt = prompt.replace('<<path>>', path)
         prompt = prompt.replace('<<outpath>>', outpath)
         prompt = prompt.replace('<<logpath>>', logpath)
+        prompt = prompt.replace('<<variant>>', variant or '')
         #
         cmd = _agent_cmd(prompt, mode=mode, model=model)
         result = subprocess.run(cmd, shell=True, capture_output=True)
@@ -158,11 +159,14 @@ def main_cli():
         if not key.startswith('--'):
             return show_help()
         key = key.lstrip('--')
-        if key not in ['model', 'mode']:
+        if key not in ['model', 'mode', 'variant']:
             return show_help()
         value = args.pop(0)
         kwargs[key] = value
-    do_loop(action, path, **kwargs)
+    if action == 'init':
+        init_config(path)
+    else:
+        do_loop(action, path, **kwargs)
 
 
 if __name__ == '__main__':

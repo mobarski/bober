@@ -36,6 +36,14 @@ Ograniczenia:
 - memiczne polskie zwierze
 - budowniczy
 
-# Instalacja- zrównoleglanie prac
+# Instalacja
 
 `uv tool install git+https://github.com/mobarski/bober`
+
+# TODO
+- [x] uv tool install
+- [x] init
+- [ ] --variant
+- [ ] help
+- [ ] ochrona plików
+- [ ] --config vs --configdir vs --cfgdir vs ~/.bober.toml
