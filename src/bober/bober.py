@@ -35,8 +35,8 @@ state.config = {}
 
 def do_loop(action: str, path: str, /, loop=1, mode=None, model=None, stopwords=None, variant=None):
     assert loop > 0, 'loop must be positive'
-    outpath = _get_default_outpath(action, path)
-    logpath = _get_default_logpath(action, path)
+    outpath = _get_default_outpath(action, path, variant=variant)
+    logpath = _get_default_logpath(action, path, variant=variant)
     stopwords = stopwords or _get_stopwords(action)
     model = model or _get_model(action)
     model = _resolve_model(model)
@@ -82,6 +82,7 @@ def init_config(path):
 
 def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, model=None, variant=None):
     t0 = time()
+    variant = variant or ''
     if not os.path.exists(path):
         returncode = 129 # ENOENT: No such file or directory
         stdout = ''
@@ -89,9 +90,9 @@ def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, mo
     else:
         prompt = _get_prompt(action)
         prompt = prompt.replace('<<path>>', path)
+        prompt = prompt.replace('<<variant>>', variant)
         prompt = prompt.replace('<<outpath>>', outpath)
         prompt = prompt.replace('<<logpath>>', logpath)
-        prompt = prompt.replace('<<variant>>', variant or '')
         #
         cmd = _agent_cmd(prompt, mode=mode, model=model)
         result = subprocess.run(cmd, shell=True, capture_output=True)
@@ -102,6 +103,7 @@ def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, mo
         'ts': datetime.fromtimestamp(t0).isoformat(),
         'action': action,
         'path': path,
+        'variant': variant,
         'returncode': returncode,
         'time': time() - t0,
         'mode': mode,
@@ -137,12 +139,18 @@ def _get_stopwords(action: str):
     return state.config.get('actions', {}).get(action, {}).get('stopwords', [])
 
 
-def _get_default_outpath(action: str, path: str):
-    return path + '.out.md' # TODO
+def _get_default_outpath(action: str, path: str, variant=None):
+    if variant:
+        return path + f'.{variant}.md'
+    else:
+        return path + '.out.md' # TODO
 
 
-def _get_default_logpath(action: str, path: str):
-    return path + '.log.jsonl' # TODO
+def _get_default_logpath(action: str, path: str, variant=None):
+    if variant:
+        return path + f'.{variant}.jsonl'
+    else:
+        return path + '.log.jsonl' # TODO
 
 
 def show_help():

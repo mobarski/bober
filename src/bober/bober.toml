@@ -15,8 +15,8 @@ prompt = """
 1. read the project file at <<path>>
 2. pick the next task and either execute it or split it into smaller tasks
 3. if the task is trivial or requires a lot of input in LLM context, then delegate it to junior model
-   - create a new, self-contained task description at <<path>>.{{step_short_slug}}.junior.md
-   - run 'bober doit <<path>>.{{step_short_slug}}.junior.md --model junior'
+   - create a new, self-contained task description at <<outpath>>.{{step_short_slug}}.md
+   - run 'bober doit <<outpath>>.{{step_short_slug}}.md --model junior'
 4. update the project file
 5. When everything is done put BREAK-THE-LOOP keyword in your output
 """

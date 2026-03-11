@@ -43,7 +43,7 @@ Ograniczenia:
 # TODO
 - [x] uv tool install
 - [x] init
-- [ ] --variant
+- [x] --variant
 - [ ] help
 - [ ] ochrona plików
 - [ ] --config vs --configdir vs --cfgdir vs ~/.bober.toml
