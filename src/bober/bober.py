@@ -96,7 +96,13 @@ def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, mo
         prompt = prompt.replace('<<logpath>>', logpath)
         #
         cmd = _agent_cmd(prompt, mode=mode, model=model)
-        result = subprocess.run(cmd, shell=True, capture_output=True)
+        imode = os.stat(path).st_mode # original permissions
+        os.chmod(path, 0o400) # read-only for the agent
+        try:
+            result = subprocess.run(cmd, shell=True, capture_output=True)
+        finally:
+            os.chmod(path, imode) # restore original permissions
+        #
         returncode = result.returncode
         stdout = result.stdout.decode()
         stderr = result.stderr.decode()

@@ -51,5 +51,5 @@ Trzeba mieć zainstalowany [Cursor CLI](https://cursor.com/cli) i zalogować si�
 - [x] init
 - [x] --variant
 - [x] help
+- [x] jakaś ochrona pliku wejściowego
 - [ ] --config vs --configdir vs --cfgdir vs ~/.bober.toml
-- [ ] ochrona plików
