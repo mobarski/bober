@@ -35,6 +35,7 @@ state.config = {}
 
 def do_loop(action: str, path: str, /, loop=1, mode=None, model=None, stopwords=None, variant=None):
     assert loop > 0, 'loop must be positive'
+    variant = variant or _get_default_variant()
     outpath = _get_default_outpath(action, path, variant=variant)
     logpath = _get_default_logpath(action, path, variant=variant)
     stopwords = stopwords or _get_stopwords(action)
@@ -140,6 +141,7 @@ def _get_stopwords(action: str):
 
 
 def _get_default_outpath(action: str, path: str, variant=None):
+    path = path.rstrip('.md')
     if variant:
         return path + f'.{variant}.md'
     else:
@@ -147,10 +149,15 @@ def _get_default_outpath(action: str, path: str, variant=None):
 
 
 def _get_default_logpath(action: str, path: str, variant=None):
+    path = path.rstrip('.md')
     if variant:
         return path + f'.{variant}.jsonl'
     else:
         return path + '.log.jsonl' # TODO
+
+
+def _get_default_variant():
+    return state.config.get('defaults', {}).get('variant', '')
 
 
 def show_help():

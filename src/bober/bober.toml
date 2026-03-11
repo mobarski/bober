@@ -1,3 +1,6 @@
+[defaults]
+variant = 'mk1'
+
 [aliases]
 leader = "composer-1.5"
 senior = "composer-1.5"
