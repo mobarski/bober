@@ -14,7 +14,20 @@ except ImportError:
     pass
 
 CONFIG_PATH = files(__package__).joinpath('bober.toml')
+HELP_TEXT = """
+Usage: bober <action> <path> [loop=1] [options]
 
+Actions:
+    help      show this help
+    init      initialize a new config file at <path>
+    plan      plan the execution for program at <path>
+    pick      pick the next task for program at <path>
+
+Options:
+    --model <model>   use a specific model
+    --mode <mode>     use a specific mode
+    --variant <variant> use a specific variant
+"""
 state = SimpleNamespace()
 state.config = {}
 
@@ -133,7 +146,7 @@ def _get_default_logpath(action: str, path: str):
 
 
 def show_help():
-    print("TODO: show help")
+    print(HELP_TEXT)
 
 
 def main_cli():
