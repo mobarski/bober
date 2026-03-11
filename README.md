@@ -1,10 +1,10 @@
 # Bober
 
-Lightweight agentic loop / harness. Under 200 lines of Python.
+Lightweight agentic loop in under 200 lines of Python.
 
-Write your program as a markdown file. Bober runs an AI agent on it in a loop — with model aliases, stopwords, iteration limits, and JSONL logs.
+Write a program as a markdown file → Bober runs an AI agent on it in a loop.
 
-Inspired by [Ralph](https://github.com/karpathy/ralph) and [Autoresearch](https://github.com/lemonodor/autoresearch).
+Inspired by [snarktank/ralph](https://github.com/snarktank/ralph) and [karpathy/autoresearch](https://github.com/lemonodor/autoresearch).
 
 ## Install
 
@@ -15,29 +15,14 @@ uv tool install git+https://github.com/mobarski/bober
 ## Quick start
 
 ```bash
-bober plan inbox/task1.md          # plan execution, produce .out.md
-bober loop inbox/task1.md 20       # run the loop (max 20 iterations)
+bober plan inbox/task1.md           # create execution plan → task1.md.out.md
+bober pick inbox/task1.md 20        # run loop, max 20 iterations
+
+bober plan inbox/task1.md --variant mk2   # named variant → task1.md.mk2.md
+bober pick inbox/task1.md 20 --variant mk2
 ```
 
-With a named variant:
-
-```bash
-bober plan inbox/task1.md --variant mk2
-bober loop inbox/task1.md 20 --variant mk2
-```
-
-## How it works
-
-1. You write a task in markdown (the "program")
-2. `bober plan` asks the agent to read it and produce an execution plan
-3. `bober loop` runs the agent repeatedly — each iteration reads the task, does work, updates progress
-
-The loop stops when:
-- a **stopword** appears in stdout/stderr (e.g. `BREAK-THE-LOOP`)
-- the agent returns a **non-zero exit code**
-- the **iteration limit** is reached
-
-## Example task
+Example task file (`inbox/task1.md`):
 
 ```markdown
 # Task
@@ -47,27 +32,46 @@ The loop stops when:
 - log output to "output.txt"
 ```
 
+## How it works
+
+```
+task.md ──→ bober plan ──→ task.md.out.md (execution plan)
+              ↓
+            bober pick ──→ agent loop (read → work → update)
+              ↓
+            stops when:
+              • stopword in output (e.g. BREAK-THE-LOOP)
+              • non-zero exit code
+              • iteration limit reached
+```
+
+Each iteration: the agent reads the task, does work, updates progress in the output file.
+
+## Unix-like I/O
+
+| Concept | Bober equivalent |
+|---|---|
+| stdin | task file (your markdown program) |
+| stdout | `.out.md` (execution output) |
+| stderr | `.log.jsonl` (structured logs) |
+| side effects | files created/modified by the agent |
+
 ## Key features
 
-| Feature | Details |
-|---|---|
-| **Model aliases** | Map `leader`, `senior`, `junior` to concrete models in config |
-| **Stopwords** | Break the loop on keyword match (configurable per action) |
-| **Hard iteration limit** | Passed as a positional arg |
-| **JSONL logs** | Every iteration logged with timestamp, duration, exit code, stdout/stderr |
-| **Unix-like I/O** | stdin (task file) → stdout/stderr (agent output) + side effects (files) |
-| **Variants** | Produce multiple outputs from one input (`--variant mk2`) |
-| **Tiny codebase** | ~200 LOC — easy to read, audit, and fork |
+- **Model aliases** — map `leader` / `senior` / `junior` to concrete models in config
+- **Stopwords** — break the loop on keyword match (per action)
+- **Hard iteration limit** — positional arg, always enforced
+- **JSONL logs** — timestamp, duration, exit code, stdout/stderr per iteration
+- **Variants** — multiple outputs from one input (`--variant mk2`)
+- **~200 LOC** — easy to read, audit, fork
 
 ## Configuration
 
-Bober ships with a default `bober.toml`. To customize:
+Default config ships with the package. To customize:
 
 ```bash
 bober init my-config.toml
 ```
-
-Example config:
 
 ```toml
 [aliases]
@@ -83,24 +87,22 @@ prompt = """
 """
 
 [actions.pick]
-loop = 10
 stopwords = ["BREAK-THE-LOOP"]
 prompt = """
 1. read the project file at <<path>>
 2. pick the next task and execute it or split it
 3. update the project file
-5. When done put BREAK-THE-LOOP in your output
+4. When done put BREAK-THE-LOOP in your output
 """
 ```
 
-Prompts use `<<path>>`, `<<outpath>>`, `<<logpath>>`, `<<variant>>` as placeholders.
+Placeholders: `<<path>>`, `<<outpath>>`, `<<logpath>>`, `<<variant>>` — replaced at runtime.
 
 ## Limitations
 
-- Currently uses **Cursor CLI** (`agent`) as the only backend
-- No parallel agent execution (keeps synchronization simple)
+- Only **Cursor CLI** (`agent`) as backend for now
+- No parallel agent execution (keeps sync simple)
 
 ## Why "Bober"
 
-- A [meme-famous Polish beaver](https://knowyourmeme.com/memes/bober-kurwa)
-- Beavers build things
+[Bober kurwa](https://knowyourmeme.com/memes/bober-kurwa) — a meme-famous Polish beaver. Beavers build things.

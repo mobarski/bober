@@ -6,7 +6,7 @@ OUTPUT: README.md
 
 # Bober
 
-Lekka pętla agentyczna / harness w stylu Ralpha i trochę Autoresearch.
+Lekka pętla agentyczna / harness w stylu snarktank/ralph i trochę karpathy/autoresearch.
 Po co: wykonywalna specyfikacja / program w markdown.
 
 Niecałe 200 linii kodu = łatwe zrozumienie i audyt.
@@ -17,7 +17,11 @@ Dodane kilka kluczowych (moim zdaniem) mechanizmów:
 - twardy limit iteracji
 - proste wywołanie bo konfiguracja w pliku
 - odrobina obserwowalności poprzez JSONL
-- podobieństwo do unixowych procesów: stdin, stdout, stderr + skutki uboczne
+- podobieństwo do unixowych procesów:
+  - stdin = path (kod programu w markdown)
+  - stdout = outpath (plik wykonania w markdown)
+  - stderr = logpath (jsonl z logami z agenta)
+  - zmiany w innych plikach jako skutki uboczne
 - łatwa produkcja wielu wariantów z jednego wejścia
 
 Ograniczenia:
