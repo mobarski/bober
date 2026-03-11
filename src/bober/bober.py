@@ -183,12 +183,7 @@ def main_cli():
 
 
 if __name__ == '__main__':
-    if False:
-        load_config()
-        do_loop('plan', 'tests/assets/task1.md')
-        do_loop('pick', 'tests/assets/task1.md', loop=10)
-    else:
-        main_cli()
+    main_cli()
 
 # TODO: model switching from prompt
 # TODO: jump back
