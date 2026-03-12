@@ -1,75 +1,80 @@
 # Bober
 
-Lightweight agentic loop / harness. Under 200 lines of Python — easy to read, audit, and extend.
+Lightweight agentic loop / harness. Under 200 lines of Python — easy to read and audit.
 
 Inspired by [ralph](https://github.com/snarktank/ralph) and [autoresearch](https://github.com/karpathy/autoresearch).
 
-**Core idea:** write an executable specification in Markdown, let an agent run it in a loop.
+**Core idea:** your program is a markdown file. Bober feeds it to an AI agent in a loop, tracks progress, and stops when done.
 
-## Features
+## Why
 
-- **Model aliases** — map `leader` / `senior` / `junior` to concrete models, pick the right size for the job
-- **Loop stopwords** — agent can break the loop by emitting a keyword (e.g. `BREAK-THE-LOOP`)
-- **Hard iteration limit** — always bounded, no runaway loops
-- **Config-driven** — prompts and settings live in a TOML file, CLI stays minimal
-- **JSONL logs** — every iteration logged for observability and post-mortem
-- **Unix process analogy:**
-  - stdin → `path` (your Markdown program)
-  - stdout → `outpath` (execution output, also Markdown)
-  - stderr → `logpath` (JSONL agent logs)
-  - side effects → file changes on disk
-- **Variants** — produce multiple outputs from a single input
+- Executable specification — write *what* you want in markdown, let the agent figure out *how*
+- Produce multiple variants from a single input
+- Simple observability via JSONL logs
+
+## How it works
+
+Think of it like a unix process:
+
+| Concept | Bober equivalent |
+|---------|-----------------|
+| stdin   | `path` — your program (markdown) |
+| stdout  | `outpath` — execution output (markdown) |
+| stderr  | `logpath` — structured logs (JSONL) |
+| side effects | file changes made by the agent |
+
+The loop runs until one of:
+- a **stopword** appears in agent output (configurable per action)
+- a **non-zero exit code** from the agent
+- the **hard iteration limit** is reached
 
 ## Install
 
-```bash
+```
 uv tool install git+https://github.com/mobarski/bober
 ```
 
+Requires [Cursor CLI](https://cursor.com/cli) — install it and log in to your account.
+
 ## Quick start
 
-Plan the execution, then run it:
-
 ```bash
+# create config at ~/.config/bober/bober.toml
+bober init
+
+# plan execution for a task
 bober plan inbox/task1.md
+
+# run the loop (max 20 iterations)
 bober loop inbox/task1.md 20
 ```
 
-With a named variant:
+### Variants
+
+Run different strategies on the same input:
 
 ```bash
 bober plan inbox/task1.md --variant mk2
 bober loop inbox/task1.md 20 --variant mk2
 ```
 
-## Usage
-
-```
-bober <action> <path> [loop] [options]
-
-Actions:
-    help      show help
-    init      create a new config file at <path>
-    plan      plan execution for the program at <path>
-    pick      pick the next task from the program at <path>
-
-Options:
-    --model <model>       model name or alias
-    --mode <mode>         agent mode
-    --variant <variant>   output variant name
-```
+Output files are namespaced by variant: `task1.mk2.md`, `task1.mk2.jsonl`.
 
 ## Configuration
 
-Default config is bundled (`bober.toml`). Create your own with:
+Resolved in order (first wins):
 
-```bash
-bober init my-config.toml
-```
+1. `--config path` CLI option
+2. `BOBER_CONFIG` env variable
+3. `~/.config/bober/bober.toml`
+4. Bundled default config
 
-Example config:
+### Config format
 
 ```toml
+[defaults]
+variant = 'mk1'
+
 [aliases]
 leader = "composer-1.5"
 senior = "composer-1.5"
@@ -77,28 +82,26 @@ junior = "composer-1"
 
 [actions.plan]
 prompt = """
-1. read the file <<path>> YOU MUST NOT EDIT IT
+1. read the file <<path>> ...
 2. plan the execution steps
-3. create a self contained task description at <<outpath>>
+3. create a self contained task at <<outpath>>
 """
 
 [actions.pick]
+loop = 10
 stopwords = ["BREAK-THE-LOOP"]
-prompt = """
-1. read the project file at <<path>>
-2. pick the next task and execute it or split it
-3. update the project file
-4. When everything is done put BREAK-THE-LOOP keyword in your output
-"""
+prompt = """..."""
 ```
 
-Placeholders in prompts: `<<path>>`, `<<outpath>>`, `<<logpath>>`, `<<variant>>`.
+**Placeholders** in prompts: `<<path>>`, `<<outpath>>`, `<<logpath>>`, `<<variant>>`
+
+**Model aliases** let you assign roles (`leader`, `senior`, `junior`) to specific models and switch them in one place.
 
 ## Limitations
 
-- Agent backend: Cursor CLI only (for now)
-- No parallel agent execution (keeps synchronization simple)
+- Only supports [Cursor CLI](https://cursor.com/cli) as the agent backend (for now)
+- No parallel agent invocation (keeps synchronization simple)
 
-## Why "Bober"
+## Name
 
-Beavers build things... and only sometimes cause floods.
+A well-known memetic Polish animal. Beavers build things... and only sometimes cause flooding or drought ;)

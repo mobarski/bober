@@ -30,11 +30,17 @@ Ograniczenia:
 
 # Użycie
 
+`bober init`
+
 `bober plan inbox/task1.md`
 `bober loop inbox/task1.md 20`
 
 `bober plan inbox/task1.md --variant mk2`
 `bober loop inbox/task1.md 20 --variant mk2`
+
+# Konfiguracja
+
+--config option > BOBER_CONFIG env variable > ~/.config/bober/bober.toml > bundled config
 
 # Skąd nazwa
 
