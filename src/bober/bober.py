@@ -7,13 +7,15 @@ import tomllib
 from types import SimpleNamespace
 import json
 from importlib.resources import files
+from pathlib import Path
 
 try:
     from rich import print
 except ImportError:
     pass
 
-CONFIG_PATH = files(__package__).joinpath('bober.toml')
+CONFIG_BUNDLED_PATH = files(__package__).joinpath('bober.toml')
+CONFIG_USER_PATH = Path.home() / '.config' / 'bober' / 'bober.toml'
 HELP_TEXT = """
 Usage: bober <action> <path> [loop=1] [options]
 
@@ -64,19 +66,19 @@ def do_loop(action: str, path: str, /, loop=1, mode=None, model=None, stopwords=
     print(result)
 
 
-def load_config(path=None):
-    if state.config and not path:
-        return  # do not load the default config if some config is already loaded
-    with open(path or CONFIG_PATH, 'rb') as f:
+def load_config(cli_config=None):
+    path = _resolve_config_path(cli_config)
+    with open(path, 'rb') as f:
         state.config = tomllib.load(f)
 
 
-def init_config(path):
-    if os.path.exists(path):
+def init_config(path=None):
+    path = path or CONFIG_USER_PATH
+    if Path(path).exists():
         raise ValueError(f'Config file {path} already exists')
-    default_config = open(CONFIG_PATH, 'r').read()
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     with open(path, 'w') as f:
-        f.write(default_config)
+        f.write(open(CONFIG_BUNDLED_PATH, 'r').read())
 
 
 ### INTERNALS #################################################################################
@@ -166,6 +168,20 @@ def _get_default_variant():
     return state.config.get('defaults', {}).get('variant', '')
 
 
+def _resolve_config_path(cli_config=None):
+    if cli_config:
+        return cli_config
+    env = os.environ.get('BOBER_CONFIG')
+    if env:
+        return env
+    user = CONFIG_USER_PATH
+    if user.exists():
+        return user
+    return CONFIG_BUNDLED_PATH
+
+
+### CLI #########################################################################################
+
 def show_help():
     print(HELP_TEXT)
 
@@ -176,12 +192,11 @@ def main_cli():
     if not args:
         return show_help()
     action = args.pop(0)
-    load_config()
     kwargs = {}
-    actions = state.config.get('actions', {}).keys()
-    if action not in ['help', 'init'] + list(actions):
-        return show_help()
     if not args:
+        if action == 'init':
+            init_config()
+            return
         return show_help()
     path = args.pop(0)
     if args and args[0].isdigit():
@@ -193,18 +208,24 @@ def main_cli():
         if not key.startswith('--'):
             return show_help()
         key = key.lstrip('--')
-        if key not in ['model', 'mode', 'variant']:
+        if key not in ['model', 'mode', 'variant', 'config']:
             return show_help()
         value = args.pop(0)
         kwargs[key] = value
     if action == 'init':
         init_config(path)
-    else:
-        do_loop(action, path, **kwargs)
+        return
+    config = kwargs.pop('config', None)
+    load_config(config)
+    actions = state.config.get('actions', {}).keys()
+    if action not in ['help', 'init'] + list(actions):
+        return show_help()
+    do_loop(action, path, **kwargs)
 
 
 if __name__ == '__main__':
     main_cli()
 
+# TODO: workspace
 # TODO: model switching from prompt
 # TODO: jump back

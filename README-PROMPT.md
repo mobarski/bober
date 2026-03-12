@@ -45,11 +45,3 @@ Ograniczenia:
 
 `uv tool install git+https://github.com/mobarski/bober`
 Trzeba mieć zainstalowany [Cursor CLI](https://cursor.com/cli) i zalogować się w nim na swoje konto.
-
-# TODO
-- [x] uv tool install
-- [x] init
-- [x] --variant
-- [x] help
-- [x] jakaś ochrona pliku wejściowego
-- [ ] --config vs --configdir vs --cfgdir vs ~/.bober.toml
