@@ -12,7 +12,7 @@ junior = "composer-1"
 [actions.doit]
 prompt = "read the file <<path>> and do it"
 
-[actions.pick]
+[actions.iter]
 loop = 10
 prompt = """
 1. read the project file at <<path>>

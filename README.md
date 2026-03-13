@@ -46,7 +46,7 @@ bober init
 bober plan inbox/task1.md
 
 # run the loop (max 20 iterations)
-bober loop inbox/task1.md 20
+bober iter inbox/task1.md 20
 ```
 
 ### Variants
@@ -55,7 +55,7 @@ Run different strategies on the same input:
 
 ```bash
 bober plan inbox/task1.md --variant mk2
-bober loop inbox/task1.md 20 --variant mk2
+bober iter inbox/task1.md 20 --variant mk2
 ```
 
 Output files are namespaced by variant: `<<base>>` = `inbox/task1.mk2`.
@@ -112,7 +112,7 @@ prompt = """
 4. logs at <<base>>.log.jsonl
 """
 
-[actions.pick]
+[actions.iter]
 loop = 10
 stopwords = ["BREAK-THE-LOOP"]
 prompt = """..."""

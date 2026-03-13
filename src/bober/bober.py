@@ -23,7 +23,7 @@ Actions:
     help      show this help
     init      initialize a new config file at <path>
     plan      plan the execution for program at <path>
-    pick      pick the next task for program at <path>
+    iter      iterate over tasks for program at <path>
 
 Options:
     --model <model>     use a specific model
