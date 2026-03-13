@@ -62,10 +62,10 @@ Output files are namespaced by variant: `<<base>>` = `inbox/task1.mk2`.
 
 ### Custom output directory
 
-By default, output files land next to the input. Use `--work` to redirect:
+By default, output files land next to the input. Use `--workdir` to redirect:
 
 ```bash
-bober plan inbox/task1.md --work output/task1
+bober plan inbox/task1.md --workdir output/task1
 ```
 
 Now `<<base>>` = `output/task1/task1.mk1`.
@@ -89,8 +89,8 @@ Config resolved in order (first wins):
 
 Work directory resolved in order (first wins):
 
-1. `--work dir` CLI option
-2. `BOBER_WORK` env variable
+1. `--workdir dir` CLI option
+2. `BOBER_WORKDIR` env variable
 3. Directory of the input file
 
 ### Config format
@@ -134,7 +134,7 @@ Use `<<base>>` to compose paths: `<<base>>.out.md`, `<<base>>.{{slug}}.md`, etc.
 | Placeholder | Example value |
 |-------------|---------------|
 | `<<stem>>` | `task1` |
-| `<<work>>` | `inbox` |
+| `<<workdir>>` | `inbox` |
 | `<<variant>>` | `mk1` |
 
 **Model aliases** let you assign roles (`leader`, `senior`, `junior`) to specific models and switch them in one place.

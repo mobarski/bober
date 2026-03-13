@@ -29,7 +29,7 @@ Options:
     --model <model>     use a specific model
     --mode <mode>       use a specific mode
     --variant <variant> use a specific variant
-    --work <dir>        output directory (default: dirname of path)
+    --workdir <dir>     output directory (default: dirname of path)
     --logpath <file>    log file path (default: auto-generated)
 """
 state = SimpleNamespace()
@@ -95,7 +95,7 @@ def _do_task(action:str, path: str, /, work=None, mode=None, model=None, variant
         prompt = _get_prompt(action)
         prompt = prompt.replace('<<path>>', path)
         prompt = prompt.replace('<<stem>>', Path(path).stem)
-        prompt = prompt.replace('<<work>>', work or '')
+        prompt = prompt.replace('<<workdir>>', work or '')
         prompt = prompt.replace('<<variant>>', variant)
         prompt = prompt.replace('<<base>>', base)
         prompt = prompt.replace('<<step>>', str(step))
@@ -157,7 +157,7 @@ def _get_stopwords(action: str):
 def _get_default_work(path: str, work=None):
     if work:
         return work.rstrip('/')
-    env = os.environ.get('BOBER_WORK')
+    env = os.environ.get('BOBER_WORKDIR')
     if env:
         return env.rstrip('/')
     return str(Path(path).parent)
@@ -216,7 +216,7 @@ def main_cli():
         if not key.startswith('--'):
             return _show_help()
         key = key.lstrip('--')
-        if key not in ['model', 'mode', 'variant', 'config', 'work', 'logpath']:
+        if key not in ['model', 'mode', 'variant', 'config', 'workdir', 'logpath']:
             return _show_help()
         value = args.pop(0)
         kwargs[key] = value
@@ -224,6 +224,8 @@ def main_cli():
         init_config(path)
         return
     config = kwargs.pop('config', None)
+    if 'workdir' in kwargs:
+        kwargs['work'] = kwargs.pop('workdir')
     load_config(config)
     actions = state.config.get('actions', {}).keys()
     if action not in ['help', 'init'] + list(actions):
