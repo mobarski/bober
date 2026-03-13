@@ -44,9 +44,7 @@ def do_loop(action: str, path: str, /, loop=1, mode=None, model=None, stopwords=
     model = model or _get_model(action)
     model = _resolve_model(model)
     for i in range(1,loop+1):
-        result = _do_task(action, path, outpath=outpath, logpath=logpath, mode=mode, model=model, variant=variant)
-        result['iteration'] = i
-        result['max_iterations'] = loop
+        result = _do_task(action, path, outpath=outpath, logpath=logpath, mode=mode, model=model, variant=variant, step=i, nsteps=loop)
         if logpath:
             with open(logpath, 'a') as f:
                 f.write(json.dumps(result) + '\n')
@@ -83,7 +81,7 @@ def init_config(path=None):
 
 ### INTERNALS #################################################################################
 
-def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, model=None, variant=None):
+def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, model=None, variant=None, step=1, nsteps=1):
     t0 = time()
     variant = variant or ''
     if not os.path.exists(path):
@@ -96,6 +94,8 @@ def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, mo
         prompt = prompt.replace('<<variant>>', variant)
         prompt = prompt.replace('<<outpath>>', outpath)
         prompt = prompt.replace('<<logpath>>', logpath)
+        prompt = prompt.replace('<<step>>', str(step))
+        prompt = prompt.replace('<<nsteps>>', str(nsteps))
         #
         cmd = _agent_cmd(prompt, mode=mode, model=model)
         imode = os.stat(path).st_mode # original permissions
@@ -119,6 +119,8 @@ def _do_task(action:str, path: str, /, outpath=None, logpath=None, mode=None, mo
         'model': model,
         'stdout': stdout,
         'stderr': stderr,
+        'step': step,
+        'nsteps': nsteps,
     }
 
 def _agent_cmd(prompt: str, mode=None, model=None):
@@ -226,6 +228,6 @@ def main_cli():
 if __name__ == '__main__':
     main_cli()
 
-# TODO: workspace
+# TODO: <<workspace>> or <<work>>
 # TODO: model switching from prompt
 # TODO: jump back

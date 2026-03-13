@@ -58,7 +58,7 @@ bober plan inbox/task1.md --variant mk2
 bober loop inbox/task1.md 20 --variant mk2
 ```
 
-Output files are namespaced by variant: `task1.mk2.md`, `task1.mk2.jsonl`.
+Output files are namespaced by variant: `task1.mk2.out.md`, `task1.mk2.log.jsonl`.
 
 ## Configuration
 
@@ -93,9 +93,25 @@ stopwords = ["BREAK-THE-LOOP"]
 prompt = """..."""
 ```
 
-**Placeholders** in prompts: `<<path>>`, `<<outpath>>`, `<<logpath>>`, `<<variant>>`
+**Placeholders** in prompts: `<<path>>`, `<<outpath>>`, `<<logpath>>`, `<<variant>>`, `<<step>>`, `<<nsteps>>`
 
 **Model aliases** let you assign roles (`leader`, `senior`, `junior`) to specific models and switch them in one place.
+
+## Safety
+
+The input file is made read-only (`chmod 400`) during agent execution. Not real security — just a foot-gun guard that costs nothing and saves you from the most obvious "oops".
+
+## Logs
+
+Each JSONL line contains: `ts`, `action`, `path`, `variant`, `step`, `nsteps`, `model`, `mode`, `returncode`, `time`, `stdout`, `stderr`, `stop`.
+
+```bash
+# failed steps
+jq 'select(.returncode != 0)' task1.mk1.jsonl
+
+# step times
+jq '{step, time}' task1.mk1.jsonl
+```
 
 ## Limitations
 
