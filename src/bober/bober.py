@@ -30,18 +30,19 @@ Options:
     --mode <mode>       use a specific mode
     --variant <variant> use a specific variant
     --work <dir>        output directory (default: dirname of path)
+    --logpath <file>    log file path (default: auto-generated)
 """
 state = SimpleNamespace()
 state.config = {}
 
 ### API SURFACE ###############################################################################
 
-def do_loop(action: str, path: str, /, loop=1, mode=None, model=None, stopwords=None, variant=None, work=None):
+def do_loop(action: str, path: str, /, loop=1, logpath=None, mode=None, model=None, stopwords=None, variant=None, work=None):
     assert loop > 0, 'loop must be positive'
     variant = variant or _get_default_variant()
     work = _get_default_work(path, work)
     outpath = _get_default_outpath(action, path, variant=variant, work=work)
-    logpath = _get_default_logpath(action, path, variant=variant, work=work)
+    logpath = logpath or _get_default_logpath(action, path, variant=variant, work=work)
     stopwords = stopwords or _get_stopwords(action)
     model = model or _get_model(action)
     model = _resolve_model(model)
@@ -86,6 +87,7 @@ def init_config(path=None):
 def _do_task(action:str, path: str, /, outpath=None, logpath=None, work=None, mode=None, model=None, variant=None, step=1, nsteps=1):
     t0 = time()
     variant = variant or ''
+    base = f'{work}/{Path(path).stem}.{variant}' if variant else f'{work}/{Path(path).stem}'
     if not os.path.exists(path):
         returncode = 129 # ENOENT: No such file or directory
         stdout = ''
@@ -96,6 +98,7 @@ def _do_task(action:str, path: str, /, outpath=None, logpath=None, work=None, mo
         prompt = prompt.replace('<<stem>>', Path(path).stem)
         prompt = prompt.replace('<<work>>', work or '')
         prompt = prompt.replace('<<variant>>', variant)
+        prompt = prompt.replace('<<base>>', base)
         prompt = prompt.replace('<<outpath>>', outpath)
         prompt = prompt.replace('<<logpath>>', logpath)
         prompt = prompt.replace('<<step>>', str(step))
@@ -222,7 +225,7 @@ def main_cli():
         if not key.startswith('--'):
             return _show_help()
         key = key.lstrip('--')
-        if key not in ['model', 'mode', 'variant', 'config', 'work']:
+        if key not in ['model', 'mode', 'variant', 'config', 'work', 'logpath']:
             return _show_help()
         value = args.pop(0)
         kwargs[key] = value

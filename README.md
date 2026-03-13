@@ -71,6 +71,14 @@ bober plan inbox/task1.md --work output/task1
 
 Now `<<work>>` = `output/task1`, `<<outpath>>` = `output/task1/task1.mk1.out.md`.
 
+### Shared log for delegated tasks
+
+When delegating subtasks (e.g. to a junior model), pass `--logpath` so all entries land in one file:
+
+```bash
+bober doit subtask.md --model junior --logpath task1.mk1.log.jsonl
+```
+
 ## Configuration
 
 Resolved in order (first wins):
@@ -115,10 +123,11 @@ prompt = """..."""
 | `<<outpath>>` | `inbox/task1.mk1.out.md` | full output path |
 | `<<logpath>>` | `inbox/task1.mk1.log.jsonl` | full log path |
 | `<<variant>>` | `mk1` | |
+| `<<base>>` | `inbox/task1.mk1` | `<<work>>/<<stem>>.<<variant>>` |
 | `<<step>>` | `1` | current iteration |
 | `<<nsteps>>` | `10` | total iterations |
 
-Use `<<stem>>` to compose custom paths: `<<work>>/<<stem>>.<<variant>>.<<step>>.md`
+Use `<<base>>` to compose custom paths: `<<base>>.{{slug}}.md`
 
 **Model aliases** let you assign roles (`leader`, `senior`, `junior`) to specific models and switch them in one place.
 

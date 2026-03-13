@@ -10,6 +10,9 @@ dependencies = []
 rich = [
     "rich>=14.3.3",
 ]
+test = [
+    "pytest",
+]
 
 [tool.uv]
 package = true
