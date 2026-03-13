@@ -196,7 +196,7 @@ def _resolve_config_path(cli_config=None):
 
 ### CLI #########################################################################################
 
-def show_help():
+def _show_help():
     print(HELP_TEXT)
 
 
@@ -204,26 +204,26 @@ def main_cli():
     # kind of ugly... but small, simple and works
     args = sys.argv[1:]
     if not args:
-        return show_help()
+        return _show_help()
     action = args.pop(0)
     kwargs = {}
     if not args:
         if action == 'init':
             init_config()
             return
-        return show_help()
+        return _show_help()
     path = args.pop(0)
     if args and args[0].isdigit():
         kwargs['loop'] = int(args.pop(0))
     if len(args) % 2 != 0:
-        return show_help()
+        return _show_help()
     while args:
         key = args.pop(0)
         if not key.startswith('--'):
-            return show_help()
+            return _show_help()
         key = key.lstrip('--')
         if key not in ['model', 'mode', 'variant', 'config', 'work']:
-            return show_help()
+            return _show_help()
         value = args.pop(0)
         kwargs[key] = value
     if action == 'init':
@@ -233,7 +233,7 @@ def main_cli():
     load_config(config)
     actions = state.config.get('actions', {}).keys()
     if action not in ['help', 'init'] + list(actions):
-        return show_help()
+        return _show_help()
     do_loop(action, path, **kwargs)
 
 
@@ -241,4 +241,3 @@ if __name__ == '__main__':
     main_cli()
 
 # TODO: model switching from prompt
-# TODO: jump back
