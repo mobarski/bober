@@ -19,7 +19,7 @@ prompt = """
 2. pick the next task and either execute it or split it into smaller tasks
 3. if the task is trivial or requires a lot of input in LLM context, then delegate it to junior model
    - create a new, self-contained task description at <<base>>.{{step_short_slug}}.md
-   - run 'bober doit <<base>>.{{step_short_slug}}.md --model junior --logpath <<logpath>>'
+   - run 'bober doit <<base>>.{{step_short_slug}}.md --model junior --logpath <<base>>.log.jsonl'
 4. update the project file
 5. When everything is done put BREAK-THE-LOOP keyword in your output
 """
@@ -29,12 +29,12 @@ stopwords = ["BREAK-THE-LOOP"]
 prompt = """
 1. read the file <<path>> YOU MUST NOT EDIT IT
 2. plan the execution steps
-3. create a self contained task description at <<outpath>>
+3. create a self contained task description at <<base>>.out.md
    - it will be "executed" by the agent
    - it will be modified by the agent
    - it will be used for tracking execution progress
    - the agent MUST NOT edit the original file at <<path>> 
-4. output logs will be stored at <<logpath>>
+4. output logs will be stored at <<base>>.log.jsonl
    - you can read them BUT NOT EDIT THEM
    - use jq for filtering
 """

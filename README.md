@@ -18,10 +18,9 @@ Think of it like a unix process:
 
 | Concept | Bober equivalent |
 |---------|-----------------|
-| stdin   | `path` — your program (markdown) |
-| stdout  | `outpath` — execution output (.out.md) |
-| stderr  | `logpath` — structured logs (.log.jsonl) |
-| workdir | `work` — output directory |
+| stdin   | `<<path>>` — your program (markdown) |
+| stdout  | `<<base>>.out.md` — execution output |
+| stderr  | `<<base>>.log.jsonl` — structured logs |
 | side effects | file changes made by the agent |
 
 The loop runs until one of:
@@ -59,7 +58,7 @@ bober plan inbox/task1.md --variant mk2
 bober loop inbox/task1.md 20 --variant mk2
 ```
 
-Output files are namespaced by variant: `<<outpath>>` = `inbox/task1.mk2.out.md`, `<<logpath>>` = `inbox/task1.mk2.log.jsonl`.
+Output files are namespaced by variant: `<<base>>` = `inbox/task1.mk2`.
 
 ### Custom output directory
 
@@ -69,7 +68,7 @@ By default, output files land next to the input. Use `--work` to redirect:
 bober plan inbox/task1.md --work output/task1
 ```
 
-Now `<<work>>` = `output/task1`, `<<outpath>>` = `output/task1/task1.mk1.out.md`.
+Now `<<base>>` = `output/task1/task1.mk1`.
 
 ### Shared log for delegated tasks
 
@@ -103,8 +102,8 @@ junior = "composer-1"
 prompt = """
 1. read the file <<path>> ...
 2. plan the execution steps
-3. create a self contained task at <<outpath>>
-4. logs at <<logpath>>
+3. create a self contained task at <<base>>.out.md
+4. logs at <<base>>.log.jsonl
 """
 
 [actions.pick]
@@ -118,16 +117,19 @@ prompt = """..."""
 | Placeholder | Example value | Note |
 |-------------|---------------|------|
 | `<<path>>` | `inbox/task1.md` | full input path with extension |
-| `<<stem>>` | `task1` | input filename without extension or path |
-| `<<work>>` | `inbox` | output directory, no trailing `/` |
-| `<<outpath>>` | `inbox/task1.mk1.out.md` | full output path |
-| `<<logpath>>` | `inbox/task1.mk1.log.jsonl` | full log path |
-| `<<variant>>` | `mk1` | |
-| `<<base>>` | `inbox/task1.mk1` | `<<work>>/<<stem>>.<<variant>>` |
+| `<<base>>` | `inbox/task1.mk1` | `work/stem.variant` prefix for output files |
 | `<<step>>` | `1` | current iteration |
 | `<<nsteps>>` | `10` | total iterations |
 
-Use `<<base>>` to compose custom paths: `<<base>>.{{slug}}.md`
+Use `<<base>>` to compose paths: `<<base>>.out.md`, `<<base>>.{{slug}}.md`, etc.
+
+**Additional placeholders** (building blocks, rarely needed directly):
+
+| Placeholder | Example value |
+|-------------|---------------|
+| `<<stem>>` | `task1` |
+| `<<work>>` | `inbox` |
+| `<<variant>>` | `mk1` |
 
 **Model aliases** let you assign roles (`leader`, `senior`, `junior`) to specific models and switch them in one place.
 

@@ -41,13 +41,12 @@ def do_loop(action: str, path: str, /, loop=1, logpath=None, mode=None, model=No
     assert loop > 0, 'loop must be positive'
     variant = variant or _get_default_variant()
     work = _get_default_work(path, work)
-    outpath = _get_default_outpath(action, path, variant=variant, work=work)
     logpath = logpath or _get_default_logpath(action, path, variant=variant, work=work)
     stopwords = stopwords or _get_stopwords(action)
     model = model or _get_model(action)
     model = _resolve_model(model)
     for i in range(1,loop+1):
-        result = _do_task(action, path, outpath=outpath, logpath=logpath, work=work, mode=mode, model=model, variant=variant, step=i, nsteps=loop)
+        result = _do_task(action, path, work=work, mode=mode, model=model, variant=variant, step=i, nsteps=loop)
         if logpath:
             with open(logpath, 'a') as f:
                 f.write(json.dumps(result) + '\n')
@@ -84,7 +83,7 @@ def init_config(path=None):
 
 ### INTERNALS #################################################################################
 
-def _do_task(action:str, path: str, /, outpath=None, logpath=None, work=None, mode=None, model=None, variant=None, step=1, nsteps=1):
+def _do_task(action:str, path: str, /, work=None, mode=None, model=None, variant=None, step=1, nsteps=1):
     t0 = time()
     variant = variant or ''
     base = f'{work}/{Path(path).stem}.{variant}' if variant else f'{work}/{Path(path).stem}'
@@ -99,8 +98,6 @@ def _do_task(action:str, path: str, /, outpath=None, logpath=None, work=None, mo
         prompt = prompt.replace('<<work>>', work or '')
         prompt = prompt.replace('<<variant>>', variant)
         prompt = prompt.replace('<<base>>', base)
-        prompt = prompt.replace('<<outpath>>', outpath)
-        prompt = prompt.replace('<<logpath>>', logpath)
         prompt = prompt.replace('<<step>>', str(step))
         prompt = prompt.replace('<<nsteps>>', str(nsteps))
         #
@@ -161,15 +158,6 @@ def _get_default_work(path: str, work=None):
     if work:
         return work.rstrip('/')
     return str(Path(path).parent)
-
-
-def _get_default_outpath(action: str, path: str, variant=None, work=None):
-    stem = Path(path).stem
-    work = _get_default_work(path, work)
-    if variant:
-        return f'{work}/{stem}.{variant}.out.md'
-    else:
-        return f'{work}/{stem}.out.md'
 
 
 def _get_default_logpath(action: str, path: str, variant=None, work=None):
