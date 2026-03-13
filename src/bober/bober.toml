@@ -34,7 +34,7 @@ prompt = """
    - it will be modified by the agent
    - it will be used for tracking execution progress
    - the agent MUST NOT edit the original file at <<path>> 
-4. output logs will be stored at <<logpath>> as JSONL
+4. output logs will be stored at <<logpath>>
    - you can read them BUT NOT EDIT THEM
    - use jq for filtering
 """
