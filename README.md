@@ -1,6 +1,6 @@
 # Bober
 
-Lightweight agentic loop / harness. Under 200 lines of Python — easy to read and audit.
+Lightweight agentic loop / harness. ~200 lines of Python — easy to read and audit.
 
 Inspired by [ralph](https://github.com/snarktank/ralph) and [autoresearch](https://github.com/karpathy/autoresearch).
 
