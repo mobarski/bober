@@ -80,12 +80,18 @@ bober doit subtask.md --model junior --logpath task1.mk1.log.jsonl
 
 ## Configuration
 
-Resolved in order (first wins):
+Config resolved in order (first wins):
 
 1. `--config path` CLI option
 2. `BOBER_CONFIG` env variable
 3. `~/.config/bober/bober.toml`
 4. Bundled default config
+
+Work directory resolved in order (first wins):
+
+1. `--work dir` CLI option
+2. `BOBER_WORK` env variable
+3. Directory of the input file
 
 ### Config format
 

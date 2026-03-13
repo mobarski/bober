@@ -157,6 +157,9 @@ def _get_stopwords(action: str):
 def _get_default_work(path: str, work=None):
     if work:
         return work.rstrip('/')
+    env = os.environ.get('BOBER_WORK')
+    if env:
+        return env.rstrip('/')
     return str(Path(path).parent)
 
 
