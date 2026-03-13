@@ -91,13 +91,15 @@ Work directory resolved in order (first wins):
 
 1. `--workdir dir` CLI option
 2. `BOBER_WORKDIR` env variable
-3. Directory of the input file
+3. `defaults.workdir` in config
+4. Directory of the input file
 
 ### Config format
 
 ```toml
 [defaults]
 variant = 'mk1'
+workdir = 'output'
 
 [aliases]
 leader = "composer-1.5"

@@ -160,6 +160,9 @@ def _get_default_work(path: str, work=None):
     env = os.environ.get('BOBER_WORKDIR')
     if env:
         return env.rstrip('/')
+    cfg = state.config.get('defaults', {}).get('workdir')
+    if cfg:
+        return cfg.rstrip('/')
     return str(Path(path).parent)
 
 
