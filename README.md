@@ -146,7 +146,13 @@ Use `<<base>>` to compose paths: `<<base>>.out.md`, `<<base>>.{{slug}}.md`, etc.
 
 ## Safety
 
-The input file is made read-only (`chmod 400`) during agent execution. Not real security — just a foot-gun guard that costs nothing and saves you from the most obvious "oops".
+Bober runs the agent with two layers of protection:
+
+1. **Filesystem sandbox** (Linux / any OS with `bwrap`): the agent process runs inside a [bubblewrap](https://github.com/containers/bubblewrap) sandbox where the entire filesystem is read-only — the only writable location is the `workdir`. No root required; `bwrap` is a standard package on all major distros and is a dependency of Flatpak, so it is widely available. Disable via `BOBER_NO_ISOLATE=1` env var or `defaults.isolate = false` in config.
+
+2. **Read-only input file** (`chmod 400`): the input markdown file is temporarily made read-only for the duration of each agent call. This fallback is always active — on macOS, BSD, or any system without `bwrap` it is the only guard.
+
+Neither layer is a full security boundary, but together they make accidental (or prompt-injected) writes outside the work directory very unlikely.
 
 ## Logs
 

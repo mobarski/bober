@@ -1,6 +1,7 @@
 import subprocess
 import os
-import sys
+import sys  # for sys.argv
+import shutil
 from time import time
 from datetime import datetime
 import tomllib
@@ -8,6 +9,8 @@ from types import SimpleNamespace
 import json
 from importlib.resources import files
 from pathlib import Path
+
+HAS_BWRAP = shutil.which('bwrap') is not None
 
 try:
     from rich import print
@@ -101,13 +104,13 @@ def _do_task(action:str, path: str, /, work=None, mode=None, model=None, variant
         prompt = prompt.replace('<<step>>', str(step))
         prompt = prompt.replace('<<nsteps>>', str(nsteps))
         #
-        cmd = _agent_cmd(prompt, mode=mode, model=model)
-        imode = os.stat(path).st_mode # original permissions
-        os.chmod(path, 0o400) # read-only for the agent
+        cmd = _agent_cmd(prompt, mode=mode, model=model, work=work)
+        imode = os.stat(path).st_mode
+        os.chmod(path, 0o400)
         try:
             result = subprocess.run(cmd, shell=True, capture_output=True)
         finally:
-            os.chmod(path, imode) # restore original permissions
+            os.chmod(path, imode)
         #
         returncode = result.returncode
         stdout = result.stdout.decode()
@@ -128,13 +131,23 @@ def _do_task(action:str, path: str, /, work=None, mode=None, model=None, variant
         'nsteps': nsteps,
     }
 
-def _agent_cmd(prompt: str, mode=None, model=None):
+def _agent_cmd(prompt: str, mode=None, model=None, work=None):
     cmd = f'''agent --trust --yolo -p "{prompt}"'''
     if mode:
         cmd += f' --mode {mode}'
     if model:
         cmd += f' --model {model}'
+    if _use_bwrap(work):
+        cmd = f'bwrap --ro-bind / / --dev /dev --proc /proc --tmpfs /tmp --bind {work} {work} -- {cmd}'
     return cmd
+
+
+def _use_bwrap(work):
+    if os.environ.get('BOBER_NO_ISOLATE'):
+        return False
+    if not state.config.get('defaults', {}).get('isolate', True):
+        return False
+    return HAS_BWRAP and bool(work)
 
 
 def _resolve_model(model=None):

@@ -1,6 +1,8 @@
 [defaults]
 variant = 'mk1'
 workdir = 'work'
+isolate = true
+
 
 [aliases]
 leader = "composer-1.5"
