@@ -59,11 +59,11 @@ def do_loop(action: str, path: str, /, nsteps=1, logpath=None, mode=None, model=
         if any(word in result['stderr'] for word in stopwords):
             result['stop'] = 'stopwords.stderr'
             break
-        print(result) # TODO: add stop reason
+        print(result, flush=True) # TODO: add stop reason
     else:
         result['stop'] = 'max_iterations'
         return
-    print(result)
+    print(result, flush=True)
 
 
 def load_config(cli_config=None):

@@ -40,3 +40,21 @@ prompt = """
 """
 stopwords = ["BREAK-THE-LOOP"]
 
+
+[actions.iter]
+nsteps = 10
+prompt = """
+1. read the project spec at <<path>>
+2. create much more detailed implementation plan at <<base>>.plan.md
+4. if it exists then improve by:
+   - adding new functionality
+   - polishing existing functionality
+   - removing unnecessary functionality
+   - refactoring to make it simpler and more elegant
+   - fixing bugs
+5. implement the plan
+6. put your final thoughts and ideas for the future at the end of the plan file
+
+This is your iteration <<step>> of <<nsteps>>.
+Make somethig great :)
+"""
