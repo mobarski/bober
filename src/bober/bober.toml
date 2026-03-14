@@ -1,6 +1,6 @@
 [defaults]
 variant = 'mk1'
-workdir = ''
+workdir = 'work'
 
 [aliases]
 leader = "composer-1.5"
@@ -12,19 +12,6 @@ junior = "composer-1"
 
 [actions.doit]
 prompt = "read the file <<path>> and do it"
-
-[actions.iter]
-loop = 10
-prompt = """
-1. read the project file at <<path>>
-2. pick the next task and either execute it or split it into smaller tasks
-3. if the task is trivial or requires a lot of input in LLM context, then delegate it to junior model
-   - create a new, self-contained task description at <<base>>.{{step_short_slug}}.md
-   - run 'bober doit <<base>>.{{step_short_slug}}.md --model junior --logpath <<base>>.log.jsonl'
-4. update the project file
-5. When everything is done put BREAK-THE-LOOP keyword in your output
-"""
-stopwords = ["BREAK-THE-LOOP"]
 
 [actions.plan]
 prompt = """
@@ -39,3 +26,17 @@ prompt = """
    - you can read them BUT NOT EDIT THEM
    - use jq for filtering
 """
+
+[actions.loop]
+nsteps = 10
+prompt = """
+1. read the project file at <<path>>
+2. pick the next few tasks and either execute them or split some of them into smaller tasks
+3. if the task is easy or requires a lot of input in LLM context, then delegate it to a junior model
+   - create a new, self-contained task description at <<base>>.{{step_short_slug}}.md
+   - run 'bober doit <<base>>.{{step_short_slug}}.md --model junior --logpath <<base>>.log.jsonl'
+4. update the project file
+5. When everything is done put the BREAK-THE-LOOP keyword in your output
+"""
+stopwords = ["BREAK-THE-LOOP"]
+

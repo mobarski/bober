@@ -17,13 +17,13 @@ except ImportError:
 CONFIG_BUNDLED_PATH = files(__package__).joinpath('bober.toml')
 CONFIG_USER_PATH = Path.home() / '.config' / 'bober' / 'bober.toml'
 HELP_TEXT = """
-Usage: bober <action> <path> [loop=1] [options]
+Usage: bober <action> <path> [nsteps=1] [options]
 
 Actions:
     help      show this help
     init      initialize a new config file at <path>
     plan      plan the execution for program at <path>
-    iter      iterate over tasks for program at <path>
+    loop      iterate over tasks for program at <path>
 
 Options:
     --model <model>     use a specific model
@@ -37,16 +37,16 @@ state.config = {}
 
 ### API SURFACE ###############################################################################
 
-def do_loop(action: str, path: str, /, loop=1, logpath=None, mode=None, model=None, stopwords=None, variant=None, work=None):
-    assert loop > 0, 'loop must be positive'
+def do_loop(action: str, path: str, /, nsteps=1, logpath=None, mode=None, model=None, stopwords=None, variant=None, work=None):
+    assert nsteps > 0, 'nsteps must be positive'
     variant = variant or _get_default_variant()
     work = _get_default_work(path, work)
     logpath = logpath or _get_default_logpath(action, path, variant=variant, work=work)
     stopwords = stopwords or _get_stopwords(action)
     model = model or _get_model(action)
     model = _resolve_model(model)
-    for i in range(1,loop+1):
-        result = _do_task(action, path, work=work, mode=mode, model=model, variant=variant, step=i, nsteps=loop)
+    for i in range(1,nsteps+1):
+        result = _do_task(action, path, work=work, mode=mode, model=model, variant=variant, step=i, nsteps=nsteps)
         if logpath:
             with open(logpath, 'a') as f:
                 f.write(json.dumps(result) + '\n')
@@ -121,6 +121,7 @@ def _do_task(action:str, path: str, /, work=None, mode=None, model=None, variant
         'time': time() - t0,
         'mode': mode,
         'model': model,
+        'prompt': prompt,
         'stdout': stdout,
         'stderr': stderr,
         'step': step,
@@ -211,7 +212,7 @@ def main_cli():
         return _show_help()
     path = args.pop(0)
     if args and args[0].isdigit():
-        kwargs['loop'] = int(args.pop(0))
+        kwargs['nsteps'] = int(args.pop(0))
     if len(args) % 2 != 0:
         return _show_help()
     while args:
