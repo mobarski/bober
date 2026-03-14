@@ -6,6 +6,9 @@ Inspired by [ralph](https://github.com/snarktank/ralph) and [autoresearch](https
 
 **Core idea:** your program is a markdown file. Bober feeds it to an AI agent in a loop, tracks progress, and stops when done.
 
+> [!WARNING]
+> Experimental software for personal use. Expect breaking changes at any time.
+
 ## Why
 
 - Executable specification — write *what* you want in markdown, let the agent figure out *how*
