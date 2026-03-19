@@ -90,27 +90,30 @@ def _do_task(action:str, path: str, /, work=None, mode=None, model=None, variant
     t0 = time()
     variant = variant or ''
     base = f'{work}/{Path(path).stem}.{variant}' if variant else f'{work}/{Path(path).stem}'
+    new_path = f'{base}.in.md'
     if not os.path.exists(path):
         returncode = 129 # ENOENT: No such file or directory
         stdout = ''
         stderr = f'File {path} not found'
     else:
+        def render(text):
+            text = text.replace('<<path>>', new_path)
+            text = text.replace('<<stem>>', Path(path).stem)
+            text = text.replace('<<workdir>>', work or '')
+            text = text.replace('<<variant>>', variant)
+            text = text.replace('<<base>>', base)
+            text = text.replace('<<step>>', str(step))
+            text = text.replace('<<nsteps>>', str(nsteps))
+            return text
         prompt = _get_prompt(action)
-        prompt = prompt.replace('<<path>>', path)
-        prompt = prompt.replace('<<stem>>', Path(path).stem)
-        prompt = prompt.replace('<<workdir>>', work or '')
-        prompt = prompt.replace('<<variant>>', variant)
-        prompt = prompt.replace('<<base>>', base)
-        prompt = prompt.replace('<<step>>', str(step))
-        prompt = prompt.replace('<<nsteps>>', str(nsteps))
+        prompt = render(prompt)
+        raw_input = open(path, 'r').read()
+        new_input = render(raw_input)
+        with open(new_path, 'w') as f:
+            f.write(new_input)
         #
         cmd = _agent_cmd(prompt, mode=mode, model=model, work=work)
-        imode = os.stat(path).st_mode
-        os.chmod(path, 0o400)
-        try:
-            result = subprocess.run(cmd, shell=True, capture_output=True)
-        finally:
-            os.chmod(path, imode)
+        result = subprocess.run(cmd, shell=True, capture_output=True)
         #
         returncode = result.returncode
         stdout = result.stdout.decode()
@@ -118,17 +121,19 @@ def _do_task(action:str, path: str, /, work=None, mode=None, model=None, variant
     return {
         'ts': datetime.fromtimestamp(t0).isoformat(),
         'action': action,
-        'path': path,
+        'path': new_path,
+        'raw_path': path,
         'variant': variant,
-        'returncode': returncode,
-        'time': time() - t0,
         'mode': mode,
         'model': model,
+        'cmd': cmd,
         'prompt': prompt,
         'stdout': stdout,
         'stderr': stderr,
+        'time': round(time() - t0, 3),
         'step': step,
         'nsteps': nsteps,
+        'returncode': returncode,
     }
 
 def _agent_cmd(prompt: str, mode=None, model=None, work=None):
@@ -138,7 +143,9 @@ def _agent_cmd(prompt: str, mode=None, model=None, work=None):
     if model:
         cmd += f' --model {model}'
     if _use_bwrap(work):
-        cmd = f'bwrap --ro-bind / / --dev /dev --proc /proc --tmpfs /tmp --bind {work} {work} -- {cmd}'
+        w = os.path.abspath(work)
+        cursor = Path.home() / '.cursor'
+        cmd = f'bwrap --ro-bind / / --dev /dev --proc /proc --tmpfs /tmp --bind {w} {w} --bind {cursor} {cursor} -- {cmd}'
     return cmd
 
 
