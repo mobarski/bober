@@ -5,9 +5,9 @@ isolate = true
 
 
 [aliases]
-leader = "composer-1.5"
-senior = "composer-1.5"
-junior = "composer-1"
+leader = "composer-2"
+senior = "composer-2"
+junior = "composer-2"
 
 
 [actions]
